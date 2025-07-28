@@ -1,0 +1,93 @@
+<LOGIN.html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Register with OTP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #eede4d;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #eede4d;
+    }
+    .hidden {
+      display: none;
+    }
+    .success {
+      color: #eede4d;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Register</h2>
+    <input type="text" id="userInput" placeholder="Email or Phone Number" />
+    <button onclick="sendOTP()">Send OTP</button>
+
+    <div id="otpSection" class="hidden">
+      <input type="text" id="otpInput" placeholder="Enter OTP" />
+      <button onclick="verifyOTP()">Verify OTP</button>
+    </div>
+
+    <p id="message" class="success"></p>
+  </div>
+
+  <script>
+    let generatedOTP = "";
+
+    function sendOTP() {
+      const userInput = document.getElementById("userInput").value.trim();
+      if (!userInput) {
+        alert("Please enter your email or phone number.");
+        return;
+      }
+
+      // Simulate OTP generation (in real app, you'd send a request to backend)
+      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log("Generated OTP:", generatedOTP); // For testing only
+
+      document.getElementById("otpSection").classList.remove("hidden");
+      document.getElementById("message").textContent = "OTP sent!";
+    }
+
+    function verifyOTP() {
+      const enteredOTP = document.getElementById("otpInput").value.trim();
+      if (enteredOTP === generatedOTP) {
+        document.getElementById("message").textContent = "OTP verified successfully!";
+      } else {
+        document.getElementById("message").textContent = "Invalid OTP. Try again.";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Honey Store - Grid Layout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #faf9f6;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #fff6e6;
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .cart-icon {
+            font-size: 2em;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .cart-icon:hover {
+            background: #ffe0a3;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #bc790b;
+            letter-spacing: 1px;
+        }
+        .catalog-section {
+            margin: 48px auto;
+            width: 95%;
+            max-width: 1400px;
+        }
+        .catalog-title {
+            color: #755107;
+            font-size: 1.6em;
+            margin: 1.5em 0 0.7em 0;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 32px;
+        }
+        .product-block {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 5px rgba(120, 76, 0, 0.08);
+            padding: 18px 18px 13px 18px;
+            text-align: center;
+        }
+        .product-image {
+            width: 150px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #fffbe9;
+            margin-bottom: 12px;
+        }
+        .product-title {
+            font-weight: bold;
+            color: #3d290a;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        .product-price, .product-total {
+            color: #b5962b;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .product-weights {
+            color: #666;
+            margin-bottom: 12px;
+            font-size: 0.97em;
+        }
+        .add-cart-btn {
+            background: linear-gradient(90deg, #ffce7b 0%, #fff4e1 100%);
+            color: #7c4f08;
+            border: none;
+            border-radius: 5px;
+            padding: 7px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.2s;
+        }
+        .add-cart-btn:hover {
+            background: linear-gradient(90deg, #ffd890 0%, #ffe8bc 100%);
+            color: #222;
+        }
+        select {
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        @media (max-width: 700px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+            .product-image {
+                width: 110px;
+                height: 80px;
+            }
+        }
+        .cart-popup {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: #fff8e0;
+            border: 1px solid #f2dc99;
+            border-radius: 8px;
+            padding: 18px 26px;
+            z-index: 2000;
+            box-shadow: 0 4px 16px rgba(90, 67, 18, 0.16);
+            min-width: 250px;
+            max-width: 340px;
+            display: none;
+        }
+        .cart-popup.active {
+            display: block;
+        }
+        .cart-popup h3 {
+            margin: 0 0 10px 0;
+            color: #b0902b;
+        }
+        .cart-item {
+            margin-bottom: 12px;
+            color: #222;
+        }
+        .cart-popup .close-btn {
+            background: none;
+            border: none;
+            float: right;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>  ORGANIC STORE </h1>
+       <a href="cart.html" class="cart-link" aria-label="Go to Cart">🛒 Cart</a>
+    </header>
+    <main>
+        <div class="catalog-section">
+
+            <!-- HONEY CATEGORY -->
+            <div class="catalog-title">Honey</div>
+            <div class="product-grid" id="honey-grid">
+                <!-- Honey products will be inserted here by script -->
+            </div>
+
+            <!-- SPICES & HERBS CATEGORY -->
+            <div class="catalog-title">Spices &amp; Herbs</div>
+            <div class="product-grid" id="spices-grid">
+                <!-- Spices & Herbs products will be inserted here by script -->
+            </div>
+
+            <!-- SOAPS CATEGORY -->
+            <div class="catalog-title">Soaps</div>
+            <div class="product-grid" id="soaps-grid">
+                <!-- Soaps products will be inserted here by script -->
+            </div>
+
+            <!-- SKIN CARE CATEGORY -->
+            <div class="catalog-title">Skin Care</div>
+            <div class="product-grid" id="skincare-grid">
+                <!-- Skin Care products will be inserted here by script -->
+            </div>
+        </div>
+    </main>
+    <!-- Cart Pop-up -->
+    <div class="cart-popup" id="cart-popup">
+        <button class="close-btn" onclick="hideCart()">×</button>
+        <h3>Your Cart</h3>
+        <div id="cart-items"></div>
+        <div class="cart-total" id="cart-total"></div>
+    </div>
+    <script>
+        // Product Data
+        const products = [
+            // Honey
+            {category:"Honey", name:"Sweet Honey",  image:"images/Sweet_Honey.jpg",     prices: {"250g":290, "500g":580, "1kg":1160}},
+            {category:"Honey", name:"Bitter Honey", image:"images/Bitter_jamun_honey.png",prices: {"250g":320, "500g":640, "1kg":1280}},
+            {category:"Honey", name:"Pepper Honey", image:"images/Spiced_Pepper_Honey.webp",      prices: {"250g":300, "500g":600, "1kg":1200}},
+            {category:"Honey", name:"Ginger Honey", image:"images/ginger_honey.webp",      prices: {"250g":300, "500g":600, "1kg":1200}},
+            {category:"Honey", name:"Fig With Honey",image:"images/honey_With_figs.jpg",   prices: {"250g":280, "500g":560, "1kg":1120}},
+            {category:"Honey", name:"Amla With Honey",image:"images/amla_honey.jpeg",      prices: {"250g":280, "500g":560, "1kg":1120}},
+            // Spices & Herbs
+            {category:"Spices & Herbs", name:"Cloves",     image:"images/Cloves.jpg",     prices: {"50g":120, "100g":240}},
+            {category:"Spices & Herbs", name:"Cinnamon",   image:"images/Cinnamon.jpg",   prices: {"50g":32, "100g":64}},
+            {category:"Spices & Herbs", name:"Black Pepper",image:"images/Black_Pepper.webp",prices: {"250g":320, "500g":640}},
+            {category:"Spices & Herbs", name:"Organic Turmeric",image:"images/Turmeric.jpg",prices: {"250g":60, "500g":120}},
+            {category:"Spices & Herbs", name:"Mace",         image:"images/Mace.jpg",      prices: {"50g":75, "100g":150}},
+            {category:"Spices & Herbs", name:"Nutmeg",       image:"images/Nutmeg.jpg",    prices: {"50g":42, "100g":110}},
+            {category:"Spices & Herbs", name:"Organic Thyme",image:"images/Thyme.webp",    prices: {"50g":40, "100g":80}},
+            {category:"Spices & Herbs", name:"Organic Rosemary",image:"images/Rosemary.webp",prices: {"50g":50, "100g":100}},
+            {category:"Spices & Herbs", name:"Organic Basil",image:"images/Basil.jpg",     prices: {"50g":55, "100g":110}},
+            {category:"Spices & Herbs", name:"Organic Origano",image:"images/Oregano.webp",prices: {"50g":45, "100g":90}},
+            // Soaps
+            {category:"Soaps", name:"Lavender Soap",   image:"images/beeswax_soap.webp", prices: {"50g":75, "100g":110}},
+            {category:"Soaps", name:"Basil Soap",      image:"images/beeswax_soap.webp", prices: {"50g":75, "100g":110}},
+            {category:"Soaps", name:"Lemon Grass Soap",image:"images/beeswax_soap.webp", prices: {"50g":75, "100g":110}},
+            {category:"Soaps", name:"Eucalyptus Soap", image:"images/beeswax_soap.webp", prices: {"50g":75, "100g":110}},
+            {category:"Soaps", name:"Rose Soap",       image:"images/beeswax_soap.webp", prices: {"50g":75, "100g":110}},
+            {category:"Soaps", name:"Jasmin Soap",     image:"images/beeswax_soap.webp", prices: {"50g":75, "100g":110}},
+            // Skin Care
+            {category:"Skin Care", name:"Lip Balm",    image:"images/Lip Balm.webp",     prices: {"5g":35, "10g":80, "15g":105}},
+            {category:"Skin Care", name:"Moisturizer", image:"images/Moisturizer.jpg",   prices: {"15g":100, "30g":200, "50g":333}}
+        ];
+
+         function renderProducts(category, gridId) {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = '';
+        products.filter(p => p.category === category)
+            .forEach((p) => {
+                const weights = Object.keys(p.prices);
+                const priceByQty = p.prices;
+                const encodedKey = encodeURIComponent(p.name);
+
+                const block = document.createElement('div');
+                block.className = 'product-block';
+
+                block.innerHTML = `
+                    <img src="${p.image}" alt="${p.name}" class="product-image" onerror="this.style.display='none'">
+                    <div class="product-title">${p.name}</div>
+                    <select class="qty-select" id="${encodedKey}_select" onchange="updatePrice('${encodedKey}', this.value)">
+                        ${weights.map(w => `<option value="${w}">${w}</option>`).join('')}
+                    </select>
+                    <div class="product-price" id="${encodedKey}_price">₹${priceByQty[weights[0]]}</div>
+                    <button class="add-cart-btn" onclick="addToCart('${encodedKey}', '${p.name}', '${category}')">Add to Cart</button>
+                `;
+                grid.appendChild(block);
+            });
+    }
+
+    // Render all product categories
+    renderProducts("Honey", "honey-grid");
+    renderProducts("Spices & Herbs", "spices-grid");
+    renderProducts("Soaps", "soaps-grid");
+    renderProducts("Skin Care", "skincare-grid");
+
+    // Cart object stored & retrieved from localStorage
+    let cart = {};
+    try {
+        cart = JSON.parse(localStorage.getItem('organicStoreCart')) || {};
+    } catch {}
+
+    function saveCart() {
+        localStorage.setItem('organicStoreCart', JSON.stringify(cart));
+    }
+
+    function updatePrice(encodedKey, selectedQty) {
+        const name = decodeURIComponent(encodedKey);
+        const prod = products.find(p => p.name === name);
+        const price = prod.prices[selectedQty];
+        document.getElementById(encodedKey + '_price').innerText = '₹' + price;
+    }
+
+    function addToCart(encodedKey, name, category) {
+        const prod = products.find(p => p.name === decodeURIComponent(encodedKey));
+        const select = document.getElementById(encodedKey + '_select');
+        const qtyLabel = select.value;
+        const unitPrice = prod.prices[qtyLabel];
+        const itemKey = `${encodedKey}_${qtyLabel}`;
+        if (cart[itemKey]) {
+            cart[itemKey].qty += 1;
+        } else {
+            cart[itemKey] = {
+                name: name,
+                category: category,
+                qtyLabel: qtyLabel,
+                unitPrice: unitPrice,
+                qty: 1
+            };
+        }
+        saveCart();
+        alert(`Added ${name} (${qtyLabel}) to cart.`);
+    }
+    </script>
+</body>
+</html>

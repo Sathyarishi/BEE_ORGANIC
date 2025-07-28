@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Cart - Organic Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fffceb;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #fff6e6;
+            padding: 22px 38px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #bc790b;
+            margin: 0;
+        }
+        a.continue-link {
+            text-decoration:none;
+            color:#a88615;
+            font-weight:500;
+            font-size:1.07em;
+        }
+        .cart-container {
+            max-width: 600px;
+            background: #fffefc;
+            margin: 48px auto 0 auto;
+            padding: 32px 34px 24px 34px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(120, 76, 0, 0.09);
+        }
+        .cart-title {
+            color: #b0902b;
+            font-size: 1.5em;
+            margin-bottom: 1.2em;
+            font-weight: bold;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ffecc6;
+        }
+        .item-name {
+            color: #2e240b;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ab0b0b;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .cart-total {
+            margin: 32px 0 16px 0;
+            text-align: right;
+            color: #a27900;
+            font-size: 1.15em;
+            font-weight: bold;
+        }
+        .checkout-btn {
+            background: linear-gradient(90deg, #ffe199 0%, #ffd57a 100%);
+            color: #614604;
+            border: none;
+            border-radius: 6px;
+            padding: 11px 32px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+            margin-top: 1em;
+        }
+        .checkout-btn:hover {
+            background: linear-gradient(90deg, #ffd371 0%, #ffd7a7 100%);
+        }
+        .customer-form {
+            display: none;
+            margin-top: 2em;
+            padding: 18px 12px 12px 12px;
+            background: #fff7db;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(160, 120, 30, 0.07);
+            clear: both;
+        }
+        .customer-form label {
+            display: block;
+            margin-top: 11px;
+            font-weight: 500;
+            color: #744800;
+        }
+        .customer-form input, .customer-form textarea, .customer-form select {
+            width: 98%;
+            padding: 7px 5px;
+            margin-top: 2px;
+            border-radius: 5px;
+            border: 1px solid #fcdeac;
+            background: #fff;
+            margin-bottom: 5px;
+        }
+        .payment-instructions {
+            margin: 7px 0 0 0;
+            color: #774700;
+            font-size: 0.97em;
+            display: none;
+        }
+        .submit-btn {
+            background: #ffde99;
+            color: #734703;
+            border: none;
+            padding: 9px 24px;
+            border-radius: 6px;
+            margin-top: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background: #ffd17f;
+        }
+        .confirmation {
+            color: green;
+            font-weight: bold;
+            text-align: center;
+            padding-top: 1.2em;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>ORGANIC STORE</h1>
+    <a href="SHOP.html" class="continue-link">← Continue Shopping</a>
+</header>
+<main>
+    <div class="cart-container">
+        <div class="cart-title">Your Cart</div>
+        <div id="cart-items"></div>
+        <div class="cart-total" id="cart-total"></div>
+        <button class="checkout-btn" id="checkout-btn" onclick="showCheckoutForm()">Proceed to Checkout</button>
+        <form class="customer-form" id="customer-form" onsubmit="submitOrder(event)">
+            <label>Name:
+                <input type="text" id="cust-name" required />
+            </label>
+            <label>Phone:
+                <input type="tel" id="cust-phone" required pattern="[0-9]{10,}" />
+            </label>
+            <label>Email:
+                <input type="email" id="cust-email" required />
+            </label>
+            <label>Address:
+                <textarea id="cust-address" rows="3" required></textarea>
+            </label>
+            <label>Payment Method:
+                <select id="payment-method" required onchange="showPaymentInstructions()">
+                    <option value="">Select...</option>
+                    <option value="cod">Cash on Delivery</option>
+                    <option value="upi">UPI / Online Payment</option>
+                </select>
+            </label>
+            <div id="cod-instructions" class="payment-instructions">
+                Pay in cash when your order arrives.
+            </div>
+            <div id="upi-instructions" class="payment-instructions">
+                Pay using UPI to: <strong>store@upi</strong><br/>
+                <label>Transaction ID (enter after payment):
+                    <input type="text" id="transaction-id" placeholder="Enter UPI Transaction ID" />
+                </label>
+            </div>
+            <button type="submit" class="submit-btn">Place Order</button>
+        </form>
+        <div class="confirmation" id="confirmation"></div>
+    </div>
+</main>
+
+<script>
+    // Retrieve cart from localStorage
+    let cart = {};
+    try {
+        cart = JSON.parse(localStorage.getItem('organicStoreCart')) || {};
+    } catch {}
+
+    function saveCart() {
+        localStorage.setItem('organicStoreCart', JSON.stringify(cart));
+    }
+
+    function renderCart() {
+        const cartItemsDiv = document.getElementById('cart-items');
+        cartItemsDiv.innerHTML = '';
+        let total = 0;
+        for (const key in cart) {
+            const item = cart[key];
+            const subtotal = item.qty * item.unitPrice;
+            total += subtotal;
+            cartItemsDiv.innerHTML += `
+                <div class="cart-item">
+                    <span class="item-name">${item.name} (${item.qtyLabel}) × ${item.qty}</span>
+                    <span>₹${subtotal}</span>
+                    <button class="remove-btn" onclick="removeItem('${key}')">–</button>
+                </div>
+            `;
+        }
+        document.getElementById('cart-total').innerText = total > 0 ? 'Total: ₹' + total : '';
+        document.getElementById('checkout-btn').style.display = total > 0 ? 'inline-block' : 'none';
+    }
+
+    function removeItem(key) {
+        if (cart[key]) {
+            cart[key].qty -= 1;
+            if (cart[key].qty <= 0) {
+                delete cart[key];
+            }
+            saveCart();
+            renderCart();
+        }
+    }
+
+    function showCheckoutForm() {
+        document.getElementById('customer-form').style.display = 'block';
+        document.getElementById('checkout-btn').style.display = 'none';
+    }
+
+    function showPaymentInstructions() {
+        const method = document.getElementById('payment-method').value;
+        document.getElementById('cod-instructions').style.display = method === 'cod' ? 'block' : 'none';
+        document.getElementById('upi-instructions').style.display = method === 'upi' ? 'block' : 'none';
+
+        const transactionInput = document.getElementById('transaction-id');
+        if (method === 'upi') {
+            transactionInput.setAttribute('required', 'required');
+        } else {
+            transactionInput.removeAttribute('required');
+            transactionInput.value = '';
+        }
+    }
+
+    function submitOrder(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('cust-name').value.trim();
+        const phone = document.getElementById('cust-phone').value.trim();
+        const email = document.getElementById('cust-email').value.trim();
+        const address = document.getElementById('cust-address').value.trim();
+        const paymentMethod = document.getElementById('payment-method').value;
+        const transactionIdInput = document.getElementById('transaction-id');
+        let transactionId = transactionIdInput ? transactionIdInput.value.trim() : '';
+
+        if (paymentMethod === 'upi' && !transactionId) {
+            alert("Please enter your UPI Transaction ID!");
+            return;
+        }
+
+        // For actual implementation, send order and user details to backend here
+
+        document.getElementById('customer-form').style.display = 'none';
+        document.getElementById('confirmation').innerText = paymentMethod === 'upi'
+            ? `Thank you, ${name}! Your order has been placed and your payment with transaction ID ${transactionId} is recorded.`
+            : `Thank you, ${name}! Your order has been placed. Please keep cash ready for delivery.`;
+
+        // Clear cart
+        cart = {};
+        saveCart();
+        renderCart();
+    }
+
+    renderCart();
+</script>
+</body>
+</html>
